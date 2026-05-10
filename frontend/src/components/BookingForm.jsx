@@ -1,7 +1,7 @@
 import { useState } from "react"
 import axios from "axios"
 
-const API = "http://localhost:8002"
+const API = "https://bookease-booking-service.onrender.com"
 
 const TIME_SLOTS = [
   "09:00","09:30","10:00","10:30","11:00","11:30",
@@ -63,67 +63,28 @@ export default function BookingForm({ onSuccess }) {
       <form onSubmit={handleSubmit} className="form">
         <div className="form-row">
           <label>Your name</label>
-          <input
-            name="customer_name"
-            placeholder="Jane Smith"
-            value={form.customer_name}
-            onChange={handleChange}
-            required
-          />
+          <input name="customer_name" placeholder="Jane Smith" value={form.customer_name} onChange={handleChange} required />
         </div>
-
         <div className="form-row">
           <label>Email</label>
-          <input
-            name="customer_email"
-            type="email"
-            placeholder="jane@example.com"
-            value={form.customer_email}
-            onChange={handleChange}
-            required
-          />
+          <input name="customer_email" type="email" placeholder="jane@example.com" value={form.customer_email} onChange={handleChange} required />
         </div>
-
         <div className="form-row">
           <label>Date</label>
-          <input
-            name="appointment_date"
-            type="date"
-            min={today}
-            value={form.appointment_date}
-            onChange={handleChange}
-            required
-          />
+          <input name="appointment_date" type="date" min={today} value={form.appointment_date} onChange={handleChange} required />
         </div>
-
         <div className="form-row">
           <label>Time</label>
-          <select
-            name="appointment_time"
-            value={form.appointment_time}
-            onChange={handleChange}
-            required
-          >
+          <select name="appointment_time" value={form.appointment_time} onChange={handleChange} required>
             <option value="">Select a time</option>
-            {TIME_SLOTS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
+            {TIME_SLOTS.map((t) => (<option key={t} value={t}>{t}</option>))}
           </select>
         </div>
-
         <div className="form-row">
           <label>Notes (optional)</label>
-          <textarea
-            name="notes"
-            placeholder="Anything we should know?"
-            value={form.notes}
-            onChange={handleChange}
-            rows={3}
-          />
+          <textarea name="notes" placeholder="Anything we should know?" value={form.notes} onChange={handleChange} rows={3} />
         </div>
-
         {error && <p className="error">{error}</p>}
-
         <button type="submit" disabled={loading} className="btn-primary">
           {loading ? "Booking..." : "Book appointment"}
         </button>
