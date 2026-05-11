@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 
 const API = "https://bookease-booking-service.onrender.com"
@@ -19,6 +19,18 @@ export default function BookingForm({ onSuccess }) {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [isOnline, setIsOnline] = useState(navigator.onLine)
+
+  useEffect(() => {
+    const goOnline = () => setIsOnline(true)
+    const goOffline = () => setIsOnline(false)
+    window.addEventListener('online', goOnline)
+    window.addEventListener('offline', goOffline)
+    return () => {
+      window.removeEventListener('online', goOnline)
+      window.removeEventListener('offline', goOffline)
+    }
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -35,10 +47,26 @@ export default function BookingForm({ onSuccess }) {
         service_id: 2,
         business_id: 1,
       })
+
+      // Handle offline queued response from service worker
+      if (res.data.offline) {
+        onSuccess({
+          id: "pending",
+          customer_name: form.customer_name,
+          customer_email: form.customer_email,
+          appointment_date: form.appointment_date,
+          appointment_time: form.appointment_time,
+          status: "queued — will sync when online",
+        })
+        return
+      }
+
       onSuccess(res.data)
     } catch (err) {
       if (err.response?.status === 409) {
         setError("That time slot is already booked. Please pick another.")
+      } else if (!isOnline) {
+        setError("You are offline. Please check your connection and try again.")
       } else {
         setError("Something went wrong. Please try again.")
       }
@@ -51,6 +79,12 @@ export default function BookingForm({ onSuccess }) {
 
   return (
     <div className="card">
+      {!isOnline && (
+        <div className="offline-banner">
+          📵 You are offline — bookings will sync when you reconnect
+        </div>
+      )}
+
       <div className="business-info">
         <div className="business-avatar">FH</div>
         <div>
@@ -86,7 +120,7 @@ export default function BookingForm({ onSuccess }) {
         </div>
         {error && <p className="error">{error}</p>}
         <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? "Booking..." : "Book appointment"}
+          {loading ? "Booking..." : isOnline ? "Book appointment" : "Save for later"}
         </button>
       </form>
     </div>
