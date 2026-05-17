@@ -4,6 +4,8 @@ sqlalchemy
 psycopg2-binary
 redis
 pydantic
+pydantic[email]
+passlib[bcrypt]
 prometheus-fastapi-instrumentator
 pytest
 httpx

@@ -1,24 +1,23 @@
 """
-BookEase — Booking Service
-Handles appointment creation, availability, and cancellation.
+BookEase Marketplace — Booking Service
 """
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from datetime import datetime, date
-from typing import Optional
-import redis
-import json
+from typing import Optional, List
 import os
+import json
 
 from database import get_db, engine
 import models
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="BookEase Booking Service", version="1.0.0")
+app = FastAPI(title="BookEase Marketplace API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,22 +28,66 @@ app.add_middleware(
 
 Instrumentator().instrument(app).expose(app)
 
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 try:
-    redis_client = redis.from_url(redis_url)
+    import redis as redis_lib
+    redis_client = redis_lib.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
 except Exception:
     redis_client = None
 
+
+# ─── Schemas ──────────────────────────────────────────────────
+
+class BusinessCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    category: str
+    address: str
+    phone: str
+    city: str = "Banjul"
+    owner_name: str
+    owner_email: str
+    owner_password: str
+
+class BusinessResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    category: Optional[str]
+    address: Optional[str]
+    phone: Optional[str]
+    city: Optional[str]
+    is_active: bool
+    created_at: datetime
+    class Config:
+        from_attributes = True
+
+class ServiceCreate(BaseModel):
+    business_id: int
+    name: str
+    description: Optional[str] = None
+    duration_minutes: int = 60
+    price: Optional[float] = None
+
+class ServiceResponse(BaseModel):
+    id: int
+    business_id: int
+    name: str
+    description: Optional[str]
+    duration_minutes: int
+    price: Optional[float]
+    is_active: bool
+    class Config:
+        from_attributes = True
 
 class BookingCreate(BaseModel):
     service_id: int
     business_id: int
     customer_name: str
     customer_email: str
+    customer_phone: Optional[str] = None
     appointment_date: date
     appointment_time: str
     notes: Optional[str] = None
-
 
 class BookingResponse(BaseModel):
     id: int
@@ -52,26 +95,134 @@ class BookingResponse(BaseModel):
     business_id: int
     customer_name: str
     customer_email: str
+    customer_phone: Optional[str]
     appointment_date: date
     appointment_time: str
     status: str
+    notes: Optional[str]
     created_at: datetime
-
     class Config:
         from_attributes = True
 
 
+# ─── Health ───────────────────────────────────────────────────
+
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "service": "booking"}
+    return {"status": "ok", "service": "booking", "version": "2.0.0"}
 
 
-@app.get("/bookings", response_model=list[BookingResponse])
-def list_bookings(business_id: Optional[int] = None, db: Session = Depends(get_db)):
+# ─── Businesses ───────────────────────────────────────────────
+
+@app.get("/businesses", response_model=List[BusinessResponse])
+def list_businesses(
+    category: Optional[str] = None,
+    city: Optional[str] = None,
+    search: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Business).filter(models.Business.is_active == True)
+    if category:
+        query = query.filter(models.Business.category == category)
+    if city:
+        query = query.filter(models.Business.city == city)
+    if search:
+        query = query.filter(
+            or_(
+                models.Business.name.ilike(f"%{search}%"),
+                models.Business.description.ilike(f"%{search}%"),
+                models.Business.category.ilike(f"%{search}%"),
+            )
+        )
+    return query.order_by(models.Business.created_at.desc()).all()
+
+
+@app.get("/businesses/{business_id}", response_model=BusinessResponse)
+def get_business(business_id: int, db: Session = Depends(get_db)):
+    business = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    return business
+
+
+@app.post("/businesses/register", response_model=BusinessResponse, status_code=201)
+def register_business(data: BusinessCreate, db: Session = Depends(get_db)):
+    # Check if email already exists
+    existing = db.query(models.User).filter(models.User.email == data.owner_email).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    # Create owner user
+    from passlib.context import CryptContext
+    pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    user = models.User(
+        name=data.owner_name,
+        email=data.owner_email,
+        hashed_password=pwd.hash(data.owner_password),
+        role="business_owner"
+    )
+    db.add(user)
+    db.flush()
+
+    # Create business
+    business = models.Business(
+        owner_id=user.id,
+        name=data.name,
+        description=data.description,
+        category=data.category,
+        address=data.address,
+        phone=data.phone,
+        city=data.city,
+    )
+    db.add(business)
+    db.commit()
+    db.refresh(business)
+    return business
+
+
+@app.get("/categories")
+def list_categories(db: Session = Depends(get_db)):
+    businesses = db.query(models.Business.category).filter(
+        models.Business.is_active == True,
+        models.Business.category != None
+    ).distinct().all()
+    categories = sorted(set([b.category for b in businesses if b.category]))
+    return {"categories": categories}
+
+
+# ─── Services ─────────────────────────────────────────────────
+
+@app.get("/businesses/{business_id}/services", response_model=List[ServiceResponse])
+def list_services(business_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Service).filter(
+        models.Service.business_id == business_id,
+        models.Service.is_active == True
+    ).all()
+
+
+@app.post("/services", response_model=ServiceResponse, status_code=201)
+def create_service(data: ServiceCreate, db: Session = Depends(get_db)):
+    service = models.Service(**data.model_dump())
+    db.add(service)
+    db.commit()
+    db.refresh(service)
+    return service
+
+
+# ─── Bookings ─────────────────────────────────────────────────
+
+@app.get("/bookings", response_model=List[BookingResponse])
+def list_bookings(
+    business_id: Optional[int] = None,
+    customer_email: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
     query = db.query(models.Booking)
     if business_id:
         query = query.filter(models.Booking.business_id == business_id)
-    return query.all()
+    if customer_email:
+        query = query.filter(models.Booking.customer_email == customer_email)
+    return query.order_by(models.Booking.appointment_date.desc()).all()
 
 
 @app.get("/bookings/{booking_id}", response_model=BookingResponse)
@@ -82,7 +233,7 @@ def get_booking(booking_id: int, db: Session = Depends(get_db)):
     return booking
 
 
-@app.post("/bookings", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
+@app.post("/bookings", response_model=BookingResponse, status_code=201)
 def create_booking(data: BookingCreate, db: Session = Depends(get_db)):
     conflict = db.query(models.Booking).filter(
         models.Booking.business_id == data.business_id,
@@ -90,9 +241,8 @@ def create_booking(data: BookingCreate, db: Session = Depends(get_db)):
         models.Booking.appointment_time == data.appointment_time,
         models.Booking.status != "cancelled",
     ).first()
-
     if conflict:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This time slot is already booked")
+        raise HTTPException(status_code=409, detail="This time slot is already booked")
 
     booking = models.Booking(**data.model_dump())
     db.add(booking)
@@ -122,7 +272,7 @@ def cancel_booking(booking_id: int, db: Session = Depends(get_db)):
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     if booking.status == "cancelled":
-        raise HTTPException(status_code=400, detail="Booking is already cancelled")
+        raise HTTPException(status_code=400, detail="Already cancelled")
     booking.status = "cancelled"
     db.commit()
     db.refresh(booking)
@@ -136,5 +286,4 @@ def check_availability(business_id: int, date: date, db: Session = Depends(get_d
         models.Booking.appointment_date == date,
         models.Booking.status != "cancelled",
     ).all()
-    booked_slots = [b.appointment_time for b in bookings]
-    return {"date": str(date), "booked_slots": booked_slots}
+    return {"date": str(date), "booked_slots": [b.appointment_time for b in bookings]}
