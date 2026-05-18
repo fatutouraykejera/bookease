@@ -287,3 +287,68 @@ def check_availability(business_id: int, date: date, db: Session = Depends(get_d
         models.Booking.status != "cancelled",
     ).all()
     return {"date": str(date), "booked_slots": [b.appointment_time for b in bookings]}
+
+
+# ─── Admin endpoints ──────────────────────────────────────────
+
+ADMIN_TOKEN = "MrsAnn0803!"
+
+def verify_admin(token: str = Query(...)):
+    if token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return True
+
+@app.get("/admin/businesses")
+def admin_list_businesses(token: str = Query(...), db: Session = Depends(get_db)):
+    verify_admin(token)
+    businesses = db.query(models.Business).order_by(models.Business.created_at.desc()).all()
+    return businesses
+
+@app.patch("/admin/businesses/{business_id}/suspend")
+def suspend_business(business_id: int, token: str = Query(...), db: Session = Depends(get_db)):
+    verify_admin(token)
+    business = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    business.is_active = False
+    db.commit()
+    db.refresh(business)
+    return {"message": f"{business.name} suspended"}
+
+@app.patch("/admin/businesses/{business_id}/activate")
+def activate_business(business_id: int, token: str = Query(...), db: Session = Depends(get_db)):
+    verify_admin(token)
+    business = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    business.is_active = True
+    db.commit()
+    db.refresh(business)
+    return {"message": f"{business.name} activated"}
+
+@app.delete("/admin/businesses/{business_id}")
+def delete_business(business_id: int, token: str = Query(...), db: Session = Depends(get_db)):
+    verify_admin(token)
+    business = db.query(models.Business).filter(models.Business.id == business_id).first()
+    if not business:
+        raise HTTPException(status_code=404, detail="Business not found")
+    db.delete(business)
+    db.commit()
+    return {"message": f"Business deleted"}
+
+@app.get("/admin/stats")
+def admin_stats(token: str = Query(...), db: Session = Depends(get_db)):
+    verify_admin(token)
+    total_businesses = db.query(models.Business).count()
+    active_businesses = db.query(models.Business).filter(models.Business.is_active == True).count()
+    suspended_businesses = db.query(models.Business).filter(models.Business.is_active == False).count()
+    total_bookings = db.query(models.Booking).count()
+    confirmed_bookings = db.query(models.Booking).filter(models.Booking.status == "confirmed").count()
+    return {
+        "total_businesses": total_businesses,
+        "active_businesses": active_businesses,
+        "suspended_businesses": suspended_businesses,
+        "total_bookings": total_bookings,
+        "confirmed_bookings": confirmed_bookings,
+        "monthly_revenue": active_businesses * 150,
+    }

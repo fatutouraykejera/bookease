@@ -112,3 +112,110 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #8B6651
 .offline-banner { background: #F5E6D3; color: #5C3D2E; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1rem; text-align: center; border: 1px solid #D4B896; }
 
 .footer { text-align: center; padding: 1.5rem; color: #8B6651; font-size: 0.8rem; background: #EDE0D4; margin-top: 2rem; }
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 1px 8px rgba(59,35,20,0.08);
+}
+
+.stat-number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #3B2314;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #8B6651;
+  margin-top: 0.25rem;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-tab {
+  background: white;
+  border: 1.5px solid #D4B896;
+  color: #5C3D2E;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.admin-tab.active {
+  background: #3B2314;
+  color: #F5E6D3;
+  border-color: #3B2314;
+}
+
+.admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.admin-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 8px rgba(59,35,20,0.08);
+}
+
+.admin-card.suspended {
+  opacity: 0.7;
+  background: #FDF0EB;
+}
+
+.admin-card-info { flex: 1; }
+.admin-card-info h3 { font-size: 1rem; font-weight: 600; color: #2C1810; }
+
+.admin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.admin-btn {
+  padding: 0.4rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  white-space: nowrap;
+}
+
+.admin-btn.suspend { background: #FDF0EB; color: #8B2500; }
+.admin-btn.suspend:hover { background: #f5d5c8; }
+.admin-btn.activate { background: #E8F5E9; color: #2E7D32; }
+.admin-btn.activate:hover { background: #c8e6c9; }
+.admin-btn.delete { background: #8B2500; color: white; }
+.admin-btn.delete:hover { background: #6B1A00; }
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.active { background: #2E7D32; }
+.status-dot.inactive { background: #8B2500; }
