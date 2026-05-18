@@ -54,7 +54,7 @@ export default function App() {
       {page !== "admin" && (
         <footer className="footer">
           <p>Connecting through one booking at a time</p>
-          <p style={{marginTop:"0.25rem"}}>Built with FastAPI · PostgreSQL · Docker · GitHub Actions</p>
+          <p className="footer-tech">Built with FastAPI · PostgreSQL · Docker · GitHub Actions</p>
         </footer>
       )}
     </div>
