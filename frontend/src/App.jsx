@@ -53,7 +53,7 @@ export default function App() {
 
       {page !== "admin" && (
         <footer className="footer">
-          <p>BookEase — Connecting The Gambia one booking at a time</p>
+          <p>Connecting through one booking at a time</p>
           <p style={{marginTop:"0.25rem"}}>Built with FastAPI · PostgreSQL · Docker · GitHub Actions</p>
         </footer>
       )}
