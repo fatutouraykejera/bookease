@@ -60,7 +60,7 @@ export default function Home({ navigate }) {
     <div className="home">
       <div className="hero">
         <h2>Book any service in The Gambia</h2>
-        <p>Hair, barbers, tailors, clinics and more — all in one place</p>
+        <p>All in one place</p>
         <div className="search-bar">
           <input
             placeholder="Search businesses..."
