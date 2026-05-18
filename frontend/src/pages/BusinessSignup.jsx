@@ -10,7 +10,10 @@ const CATEGORIES = [
 
 const CITIES = [
   "Banjul", "Serrekunda", "Brikama", "Bakau", "Farafenni",
-  "Lamin", "Sukuta", "Gunjur", "Basse", "Janjanbureh", "Other"
+  "Lamin", "Sukuta", "Gunjur", "Basse", "Janjanbureh",
+  "Dakar", "Accra", "Lagos", "Abidjan", "Nairobi",
+  "London", "Barcelona", "Madrid", "Paris", "New York",
+  "Other"
 ]
 
 export default function BusinessSignup({ navigate }) {

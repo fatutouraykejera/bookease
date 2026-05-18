@@ -31,7 +31,7 @@ export default function App() {
         <header className="header">
           <div className="header-inner">
             <h1 onClick={() => navigate("home")} style={{cursor:"pointer"}}>BookEase</h1>
-            <p>The Gambia's booking platform</p>
+            <p>Your local booking platform</p>
             <nav className="nav">
               <button className="nav-btn" onClick={() => navigate("home")}>Browse</button>
               <button className="nav-btn" onClick={() => navigate("my-bookings")}>My Bookings</button>
@@ -53,7 +53,7 @@ export default function App() {
 
       {page !== "admin" && (
         <footer className="footer">
-          <p>Connecting through one booking at a time</p>
+          <p>Connecting people through one booking at a time</p>
           <p className="footer-tech">Built with FastAPI · PostgreSQL · Docker · GitHub Actions</p>
         </footer>
       )}

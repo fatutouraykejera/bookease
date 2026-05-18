@@ -59,7 +59,7 @@ export default function Home({ navigate }) {
   return (
     <div className="home">
       <div className="hero">
-        <h2>Book any service in The Gambia</h2>
+        <h2>Book any service, anywhere</h2>
         <p>All in one place</p>
         <div className="search-bar">
           <input
