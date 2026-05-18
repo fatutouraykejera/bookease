@@ -350,5 +350,5 @@ def admin_stats(token: str = Query(...), db: Session = Depends(get_db)):
         "suspended_businesses": suspended_businesses,
         "total_bookings": total_bookings,
         "confirmed_bookings": confirmed_bookings,
-        "monthly_revenue": active_businesses * 150,
+        "monthly_revenue": active_businesses * 500,
     }

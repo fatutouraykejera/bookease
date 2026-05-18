@@ -219,3 +219,13 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #8B6651
 }
 .status-dot.active { background: #2E7D32; }
 .status-dot.inactive { background: #8B2500; }
+
+.admin-pricing-banner {
+  background: #3B2314;
+  color: #F5E6D3;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  text-align: center;
+}

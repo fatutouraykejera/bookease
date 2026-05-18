@@ -3,6 +3,8 @@ import axios from "axios"
 
 const API = "https://bookease-booking-service.onrender.com"
 const ADMIN_TOKEN = "MrsAnn0803!"
+const SETUP_FEE = 1000
+const MONTHLY_FEE = 500
 
 export default function Admin({ navigate }) {
   const [password, setPassword] = useState("")
@@ -97,6 +99,11 @@ export default function Admin({ navigate }) {
         <button className="back-btn" onClick={() => navigate("home")}>← Back to site</button>
       </div>
 
+      {/* Pricing info */}
+      <div className="admin-pricing-banner">
+        💰 Setup fee: <strong>D{SETUP_FEE}</strong> (one-time) &nbsp;·&nbsp; Monthly subscription: <strong>D{MONTHLY_FEE}/month</strong>
+      </div>
+
       {/* Stats */}
       {stats && (
         <div className="admin-stats">
@@ -117,8 +124,12 @@ export default function Admin({ navigate }) {
             <div className="stat-label">Total bookings</div>
           </div>
           <div className="stat-card">
-            <div className="stat-number" style={{color:"#3B2314"}}>D{stats.monthly_revenue}</div>
+            <div className="stat-number" style={{color:"#3B2314"}}>D{stats.active_businesses * MONTHLY_FEE}</div>
             <div className="stat-label">Monthly revenue</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number" style={{color:"#3B2314"}}>D{stats.total_businesses * SETUP_FEE}</div>
+            <div className="stat-label">Setup fees earned</div>
           </div>
         </div>
       )}
@@ -126,10 +137,13 @@ export default function Admin({ navigate }) {
       {/* Tabs */}
       <div className="admin-tabs">
         <button className={`admin-tab ${tab === "businesses" ? "active" : ""}`} onClick={() => setTab("businesses")}>
-          Businesses ({businesses.length})
+          Active ({businesses.filter(b => b.is_active).length})
         </button>
         <button className={`admin-tab ${tab === "suspended" ? "active" : ""}`} onClick={() => setTab("suspended")}>
           Suspended ({businesses.filter(b => !b.is_active).length})
+        </button>
+        <button className={`admin-tab ${tab === "all" ? "active" : ""}`} onClick={() => setTab("all")}>
+          All ({businesses.length})
         </button>
       </div>
 
@@ -138,7 +152,11 @@ export default function Admin({ navigate }) {
       ) : (
         <div className="admin-list">
           {businesses
-            .filter(b => tab === "businesses" ? b.is_active : !b.is_active)
+            .filter(b => {
+              if (tab === "businesses") return b.is_active
+              if (tab === "suspended") return !b.is_active
+              return true
+            })
             .map(b => (
               <div key={b.id} className={`admin-card ${!b.is_active ? "suspended" : ""}`}>
                 <div className="admin-card-info">
@@ -150,7 +168,7 @@ export default function Admin({ navigate }) {
                   <p className="muted">📞 {b.phone}</p>
                   <p className="muted" style={{fontSize:"0.75rem"}}>
                     Joined: {new Date(b.created_at).toLocaleDateString()} ·
-                    Fee: D150/month ·
+                    Setup: D{SETUP_FEE} · Monthly: D{MONTHLY_FEE} ·
                     Status: {b.is_active ? "✅ Active" : "❌ Suspended"}
                   </p>
                 </div>
@@ -170,9 +188,13 @@ export default function Admin({ navigate }) {
                 </div>
               </div>
             ))}
-          {businesses.filter(b => tab === "businesses" ? b.is_active : !b.is_active).length === 0 && (
+          {businesses.filter(b => {
+            if (tab === "businesses") return b.is_active
+            if (tab === "suspended") return !b.is_active
+            return true
+          }).length === 0 && (
             <p className="muted" style={{padding:"2rem", textAlign:"center"}}>
-              {tab === "businesses" ? "No active businesses." : "No suspended businesses."}
+              No businesses here yet.
             </p>
           )}
         </div>
