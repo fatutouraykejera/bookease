@@ -162,7 +162,7 @@ def register_business(data: BusinessCreate, db: Session = Depends(get_db)):
     user = models.User(
         name=data.owner_name,
         email=data.owner_email,
-        hashed_password=pwd.hash(data.owner_password),
+        hashed_password=pwd.hash(data.owner_password[:72]),
         role="business_owner"
     )
     db.add(user)
