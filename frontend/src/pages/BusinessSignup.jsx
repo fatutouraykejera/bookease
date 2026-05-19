@@ -270,7 +270,7 @@ export default function BusinessSignup({ navigate }) {
 
           {step === 4 && (
             <>
-              <p className="muted" style={{marginBottom:"1rem"}}>Add photos or videos of your work — this helps customers choose you!</p>
+              <p className="muted" style={{marginBottom:"1rem"}}>Add photos or videos of your work. This helps customers choose you!</p>
               <MediaUpload onUpload={setMedia} existing={media} />
               {error && <p className="error">{error}</p>}
               <div style={{display:"flex", gap:"0.5rem", marginTop:"1rem"}}>
