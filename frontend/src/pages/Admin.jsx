@@ -99,11 +99,6 @@ export default function Admin({ navigate }) {
         <button className="back-btn" onClick={() => navigate("home")}>← Back to site</button>
       </div>
 
-      {/* Pricing info */}
-      <div className="admin-pricing-banner">
-        💰 Setup fee: <strong>D{SETUP_FEE}</strong> (one-time) &nbsp;·&nbsp; Monthly subscription: <strong>D{MONTHLY_FEE}/month</strong>
-      </div>
-
       {/* Stats */}
       {stats && (
         <div className="admin-stats">
