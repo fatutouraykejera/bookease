@@ -37,6 +37,10 @@ except Exception:
 
 # ─── Schemas ──────────────────────────────────────────────────
 
+class MediaItemInput(BaseModel):
+    url: str
+    type: str
+
 class BusinessCreate(BaseModel):
     name: str
     description: Optional[str] = None
@@ -47,6 +51,7 @@ class BusinessCreate(BaseModel):
     owner_name: str
     owner_email: str
     owner_password: str
+    media: Optional[List[MediaItemInput]] = []
 
 class BusinessResponse(BaseModel):
     id: int
@@ -147,13 +152,12 @@ def get_business(business_id: int, db: Session = Depends(get_db)):
 
 @app.post("/businesses/register", response_model=BusinessResponse, status_code=201)
 def register_business(data: BusinessCreate, db: Session = Depends(get_db)):
-    # Check if email already exists
     existing = db.query(models.User).filter(models.User.email == data.owner_email).first()
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
 
-    # Create owner user
     from passlib.context import CryptContext
+    import json as _json
     pwd = CryptContext(schemes=["bcrypt"], deprecated="auto")
     user = models.User(
         name=data.owner_name,
@@ -164,7 +168,10 @@ def register_business(data: BusinessCreate, db: Session = Depends(get_db)):
     db.add(user)
     db.flush()
 
-    # Create business
+    media_list = []
+    if hasattr(data, "media") and data.media:
+        media_list = [m.dict() if hasattr(m, "dict") else m for m in data.media]
+
     business = models.Business(
         owner_id=user.id,
         name=data.name,
@@ -173,6 +180,7 @@ def register_business(data: BusinessCreate, db: Session = Depends(get_db)):
         address=data.address,
         phone=data.phone,
         city=data.city,
+        media_json=_json.dumps(media_list),
     )
     db.add(business)
     db.commit()
