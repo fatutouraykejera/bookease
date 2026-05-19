@@ -10,27 +10,27 @@ const CATEGORIES = [
 ]
 
 const CITY_CONFIG = {
-  "Banjul":      { currency: "D",   label: "Dalasi (D)" },
-  "Serrekunda":  { currency: "D",   label: "Dalasi (D)" },
-  "Brikama":     { currency: "D",   label: "Dalasi (D)" },
-  "Bakau":       { currency: "D",   label: "Dalasi (D)" },
-  "Farafenni":   { currency: "D",   label: "Dalasi (D)" },
-  "Lamin":       { currency: "D",   label: "Dalasi (D)" },
-  "Sukuta":      { currency: "D",   label: "Dalasi (D)" },
-  "Gunjur":      { currency: "D",   label: "Dalasi (D)" },
-  "Basse":       { currency: "D",   label: "Dalasi (D)" },
-  "Janjanbureh": { currency: "D",   label: "Dalasi (D)" },
-  "Dakar":       { currency: "CFA", label: "CFA Franc (CFA)" },
-  "Accra":       { currency: "GH₵", label: "Ghanaian Cedi (GH₵)" },
-  "Lagos":       { currency: "₦",   label: "Nigerian Naira (₦)" },
-  "Abidjan":     { currency: "CFA", label: "CFA Franc (CFA)" },
-  "Nairobi":     { currency: "KSh", label: "Kenyan Shilling (KSh)" },
-  "London":      { currency: "£",   label: "British Pound (£)" },
-  "Barcelona":   { currency: "€",   label: "Euro (€)" },
-  "Madrid":      { currency: "€",   label: "Euro (€)" },
-  "Paris":       { currency: "€",   label: "Euro (€)" },
-  "New York":    { currency: "$",   label: "US Dollar ($)" },
-  "Other":       { currency: "",    label: "Enter currency manually" },
+  "Banjul":      { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Serrekunda":  { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Brikama":     { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Bakau":       { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Farafenni":   { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Lamin":       { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Sukuta":      { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Gunjur":      { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Basse":       { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Janjanbureh": { currency: "D",   label: "Dalasi (D)",              phone_prefix: "+220" },
+  "Dakar":       { currency: "CFA", label: "CFA Franc (CFA)",         phone_prefix: "+221" },
+  "Accra":       { currency: "GH₵", label: "Ghanaian Cedi (GH₵)",    phone_prefix: "+233" },
+  "Lagos":       { currency: "₦",   label: "Nigerian Naira (₦)",     phone_prefix: "+234" },
+  "Abidjan":     { currency: "CFA", label: "CFA Franc (CFA)",         phone_prefix: "+225" },
+  "Nairobi":     { currency: "KSh", label: "Kenyan Shilling (KSh)",   phone_prefix: "+254" },
+  "London":      { currency: "£",   label: "British Pound (£)",       phone_prefix: "+44" },
+  "Barcelona":   { currency: "€",   label: "Euro (€)",                phone_prefix: "+34" },
+  "Madrid":      { currency: "€",   label: "Euro (€)",                phone_prefix: "+34" },
+  "Paris":       { currency: "€",   label: "Euro (€)",                phone_prefix: "+33" },
+  "New York":    { currency: "$",   label: "US Dollar ($)",           phone_prefix: "+1" },
+  "Other":       { currency: "",    label: "Enter currency manually",  phone_prefix: "+" },
 }
 
 const CITIES = Object.keys(CITY_CONFIG)
@@ -60,7 +60,8 @@ export default function BusinessSignup({ navigate }) {
     const { name, value } = e.target
     if (name === "city") {
       const currency = CITY_CONFIG[value]?.currency || ""
-      setForm({ ...form, city: value, currency })
+      const phone_prefix = CITY_CONFIG[value]?.phone_prefix || "+"
+      setForm({ ...form, city: value, currency, phone: phone_prefix + " " })
     } else {
       setForm({ ...form, [name]: value })
     }
