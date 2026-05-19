@@ -145,9 +145,7 @@ export default function BusinessSignup({ navigate }) {
       <div className="card">
         <h2>List your business</h2>
         <p className="muted" style={{marginBottom:"0.5rem"}}>Join BookEase and let customers book your services online.</p>
-        <div className="pricing-note">
-          Setup fee: {currency || "D"}1,000 (one-time) · Monthly: {currency || "D"}500/month
-        </div>
+
 
         <div className="steps">
           <div className={`step ${step >= 1 ? "active" : ""}`}>1. Your details</div>
