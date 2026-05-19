@@ -1,5 +1,6 @@
 import { useState } from "react"
 import axios from "axios"
+import MediaUpload from "../components/MediaUpload"
 
 const API = "https://bookease-booking-service.onrender.com"
 
@@ -8,13 +9,31 @@ const CATEGORIES = [
   "Pharmacy", "Restaurant", "Gym", "Spa", "Photography", "Tutoring", "Other"
 ]
 
-const CITIES = [
-  "Banjul", "Serrekunda", "Brikama", "Bakau", "Farafenni",
-  "Lamin", "Sukuta", "Gunjur", "Basse", "Janjanbureh",
-  "Dakar", "Accra", "Lagos", "Abidjan", "Nairobi",
-  "London", "Barcelona", "Madrid", "Paris", "New York",
-  "Other"
-]
+const CITY_CONFIG = {
+  "Banjul":      { currency: "D",   label: "Dalasi (D)" },
+  "Serrekunda":  { currency: "D",   label: "Dalasi (D)" },
+  "Brikama":     { currency: "D",   label: "Dalasi (D)" },
+  "Bakau":       { currency: "D",   label: "Dalasi (D)" },
+  "Farafenni":   { currency: "D",   label: "Dalasi (D)" },
+  "Lamin":       { currency: "D",   label: "Dalasi (D)" },
+  "Sukuta":      { currency: "D",   label: "Dalasi (D)" },
+  "Gunjur":      { currency: "D",   label: "Dalasi (D)" },
+  "Basse":       { currency: "D",   label: "Dalasi (D)" },
+  "Janjanbureh": { currency: "D",   label: "Dalasi (D)" },
+  "Dakar":       { currency: "CFA", label: "CFA Franc (CFA)" },
+  "Accra":       { currency: "GH₵", label: "Ghanaian Cedi (GH₵)" },
+  "Lagos":       { currency: "₦",   label: "Nigerian Naira (₦)" },
+  "Abidjan":     { currency: "CFA", label: "CFA Franc (CFA)" },
+  "Nairobi":     { currency: "KSh", label: "Kenyan Shilling (KSh)" },
+  "London":      { currency: "£",   label: "British Pound (£)" },
+  "Barcelona":   { currency: "€",   label: "Euro (€)" },
+  "Madrid":      { currency: "€",   label: "Euro (€)" },
+  "Paris":       { currency: "€",   label: "Euro (€)" },
+  "New York":    { currency: "$",   label: "US Dollar ($)" },
+  "Other":       { currency: "",    label: "Enter currency manually" },
+}
+
+const CITIES = Object.keys(CITY_CONFIG)
 
 export default function BusinessSignup({ navigate }) {
   const [step, setStep] = useState(1)
@@ -28,15 +47,23 @@ export default function BusinessSignup({ navigate }) {
     address: "",
     city: "Serrekunda",
     phone: "",
+    currency: "D",
   })
   const [services, setServices] = useState([{ name: "", duration_minutes: 60, price: "" }])
+  const [media, setMedia] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [done, setDone] = useState(false)
   const [createdBusiness, setCreatedBusiness] = useState(null)
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value })
+    const { name, value } = e.target
+    if (name === "city") {
+      const currency = CITY_CONFIG[value]?.currency || ""
+      setForm({ ...form, city: value, currency })
+    } else {
+      setForm({ ...form, [name]: value })
+    }
     setError("")
   }
 
@@ -59,12 +86,13 @@ export default function BusinessSignup({ navigate }) {
     setLoading(true)
     setError("")
     try {
-      // Register business
-      const res = await axios.post(`${API}/businesses/register`, form)
+      const res = await axios.post(`${API}/businesses/register`, {
+        ...form,
+        media: media.map(m => ({ url: m.url, type: m.type }))
+      })
       const business = res.data
       setCreatedBusiness(business)
 
-      // Add services
       for (const svc of services) {
         if (svc.name.trim()) {
           await axios.post(`${API}/services`, {
@@ -87,10 +115,12 @@ export default function BusinessSignup({ navigate }) {
     }
   }
 
+  const currency = form.currency || CITY_CONFIG[form.city]?.currency || ""
+
   if (done) {
     return (
       <div className="card confirmation">
-        <div className="checkmark">✓</div>
+        <div className="checkmark">+</div>
         <h2>You're listed!</h2>
         <p className="muted">Welcome to BookEase, {createdBusiness?.name}!</p>
         <div className="booking-details">
@@ -110,18 +140,22 @@ export default function BusinessSignup({ navigate }) {
 
   return (
     <div className="profile-page">
-      <button className="back-btn" onClick={() => navigate("home")}>← Back</button>
-
+      <button className="back-btn" onClick={() => navigate("home")}>Back</button>
       <div className="card">
         <h2>List your business</h2>
-        <p className="muted" style={{marginBottom:"1.5rem"}}>Join BookEase and let customers book your services online — free forever.</p>
+        <p className="muted" style={{marginBottom:"0.5rem"}}>Join BookEase and let customers book your services online.</p>
+        <div className="pricing-note">
+          Setup fee: D1,000 (one-time) · Monthly: D500/month
+        </div>
 
         <div className="steps">
           <div className={`step ${step >= 1 ? "active" : ""}`}>1. Your details</div>
-          <div className="step-divider">→</div>
+          <div className="step-divider">-</div>
           <div className={`step ${step >= 2 ? "active" : ""}`}>2. Business info</div>
-          <div className="step-divider">→</div>
+          <div className="step-divider">-</div>
           <div className={`step ${step >= 3 ? "active" : ""}`}>3. Services</div>
+          <div className="step-divider">-</div>
+          <div className={`step ${step >= 4 ? "active" : ""}`}>4. Photos</div>
         </div>
 
         <form onSubmit={handleSubmit} className="form">
@@ -139,14 +173,11 @@ export default function BusinessSignup({ navigate }) {
                 <label>Password</label>
                 <input name="owner_password" type="password" placeholder="Create a password" value={form.owner_password} onChange={handleChange} required minLength={6} />
               </div>
+              {error && <p className="error">{error}</p>}
               <button type="button" className="btn-primary" onClick={() => {
-                if (!form.owner_name || !form.owner_email || !form.owner_password) {
-                  setError("Please fill in all fields")
-                  return
-                }
-                setError("")
-                setStep(2)
-              }}>Next →</button>
+                if (!form.owner_name || !form.owner_email || !form.owner_password) { setError("Please fill in all fields"); return }
+                setError(""); setStep(2)
+              }}>Next</button>
             </>
           )}
 
@@ -154,7 +185,7 @@ export default function BusinessSignup({ navigate }) {
             <>
               <div className="form-row">
                 <label>Business name</label>
-                <input name="name" placeholder="e.g. Fatou's Hair Salon" value={form.name} onChange={handleChange} required />
+                <input name="name" placeholder="e.g. Fatou Hair Salon" value={form.name} onChange={handleChange} required />
               </div>
               <div className="form-row">
                 <label>Category</label>
@@ -169,6 +200,15 @@ export default function BusinessSignup({ navigate }) {
                   {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
+              {CITY_CONFIG[form.city]?.currency === "" && (
+                <div className="form-row">
+                  <label>Currency symbol</label>
+                  <input name="currency" placeholder="e.g. $, €, £" value={form.currency} onChange={handleChange} maxLength={5} />
+                </div>
+              )}
+              <div className="currency-note">
+                Currency for your prices: <strong>{CITY_CONFIG[form.city]?.label || "Enter above"}</strong>
+              </div>
               <div className="form-row">
                 <label>Address</label>
                 <input name="address" placeholder="Street or area" value={form.address} onChange={handleChange} required />
@@ -181,23 +221,22 @@ export default function BusinessSignup({ navigate }) {
                 <label>Description (optional)</label>
                 <textarea name="description" placeholder="Tell customers about your business..." value={form.description} onChange={handleChange} rows={3} />
               </div>
+              {error && <p className="error">{error}</p>}
               <div style={{display:"flex", gap:"0.5rem"}}>
-                <button type="button" className="btn-secondary" onClick={() => setStep(1)}>← Back</button>
+                <button type="button" className="btn-secondary" onClick={() => setStep(1)}>Back</button>
                 <button type="button" className="btn-primary" onClick={() => {
-                  if (!form.name || !form.category || !form.city || !form.address || !form.phone) {
-                    setError("Please fill in all required fields")
-                    return
-                  }
-                  setError("")
-                  setStep(3)
-                }}>Next →</button>
+                  if (!form.name || !form.category || !form.city || !form.address || !form.phone) { setError("Please fill in all required fields"); return }
+                  setError(""); setStep(3)
+                }}>Next</button>
               </div>
             </>
           )}
 
           {step === 3 && (
             <>
-              <p className="muted" style={{marginBottom:"1rem"}}>Add the services you offer. You can add more later.</p>
+              <p className="muted" style={{marginBottom:"1rem"}}>
+                Add the services you offer. Prices will be shown in <strong>{CITY_CONFIG[form.city]?.label || currency}</strong>.
+              </p>
               {services.map((svc, i) => (
                 <div key={i} className="service-form-item">
                   <div className="form-row">
@@ -210,7 +249,7 @@ export default function BusinessSignup({ navigate }) {
                       <input type="number" value={svc.duration_minutes} onChange={e => handleServiceChange(i, "duration_minutes", e.target.value)} min={15} step={15} />
                     </div>
                     <div className="form-row" style={{flex:1}}>
-                      <label>Price (Dalasi)</label>
+                      <label>Price ({currency || "optional"})</label>
                       <input type="number" placeholder="Optional" value={svc.price} onChange={e => handleServiceChange(i, "price", e.target.value)} min={0} />
                     </div>
                   </div>
@@ -220,18 +259,27 @@ export default function BusinessSignup({ navigate }) {
                 </div>
               ))}
               <button type="button" className="btn-secondary" onClick={addService}>+ Add another service</button>
-
               {error && <p className="error">{error}</p>}
               <div style={{display:"flex", gap:"0.5rem", marginTop:"0.5rem"}}>
-                <button type="button" className="btn-secondary" onClick={() => setStep(2)}>← Back</button>
+                <button type="button" className="btn-secondary" onClick={() => setStep(2)}>Back</button>
+                <button type="button" className="btn-primary" onClick={() => { setError(""); setStep(4) }}>Next</button>
+              </div>
+            </>
+          )}
+
+          {step === 4 && (
+            <>
+              <p className="muted" style={{marginBottom:"1rem"}}>Add photos or videos of your work — this helps customers choose you!</p>
+              <MediaUpload onUpload={setMedia} existing={media} />
+              {error && <p className="error">{error}</p>}
+              <div style={{display:"flex", gap:"0.5rem", marginTop:"1rem"}}>
+                <button type="button" className="btn-secondary" onClick={() => setStep(3)}>Back</button>
                 <button type="submit" className="btn-primary" disabled={loading}>
                   {loading ? "Creating listing..." : "List my business!"}
                 </button>
               </div>
             </>
           )}
-
-          {error && step !== 3 && <p className="error">{error}</p>}
         </form>
       </div>
     </div>

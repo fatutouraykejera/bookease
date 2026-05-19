@@ -236,3 +236,11 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: #8B6651
   margin-top: 0.25rem;
   opacity: 0.7;
 }
+
+.currency-note {
+  background: #F5E6D3;
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  font-size: 0.85rem;
+  color: #5C3D2E;
+}
