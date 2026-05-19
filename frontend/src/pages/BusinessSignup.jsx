@@ -244,8 +244,8 @@ export default function BusinessSignup({ navigate }) {
                   </div>
                   <div style={{display:"flex", gap:"0.5rem"}}>
                     <div className="form-row" style={{flex:1}}>
-                      <label>Duration (mins)</label>
-                      <input type="number" value={svc.duration_minutes} onChange={e => handleServiceChange(i, "duration_minutes", e.target.value)} min={15} step={15} />
+                      <label>Duration (mins) <span style={{color:"#C4A882", fontWeight:"normal"}}>(optional)</span></label>
+                      <input type="number" placeholder="e.g. 60" value={svc.duration_minutes} onChange={e => handleServiceChange(i, "duration_minutes", e.target.value)} min={15} step={15} />
                     </div>
                     <div className="form-row" style={{flex:1}}>
                       <label>Price ({currency || "optional"})</label>

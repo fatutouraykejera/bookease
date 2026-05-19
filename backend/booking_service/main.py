@@ -70,7 +70,7 @@ class ServiceCreate(BaseModel):
     business_id: int
     name: str
     description: Optional[str] = None
-    duration_minutes: int = 60
+    duration_minutes: Optional[int] = None
     price: Optional[float] = None
 
 class ServiceResponse(BaseModel):
