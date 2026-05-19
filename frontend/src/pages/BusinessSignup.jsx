@@ -88,7 +88,15 @@ export default function BusinessSignup({ navigate }) {
     setError("")
     try {
       const res = await axios.post(`${API}/businesses/register`, {
-        ...form,
+        owner_name: form.owner_name,
+        owner_email: form.owner_email,
+        owner_password: form.owner_password,
+        name: form.name,
+        category: form.category,
+        description: form.description || "",
+        address: form.address,
+        phone: form.phone,
+        city: form.city,
         media: media.map(m => ({ url: m.url, type: m.type }))
       })
       const business = res.data
@@ -268,12 +276,17 @@ export default function BusinessSignup({ navigate }) {
 
           {step === 4 && (
             <>
-              <p className="muted" style={{marginBottom:"1rem"}}>Add photos or videos of your work. This helps customers choose you!</p>
+              <p className="muted" style={{marginBottom:"1rem"}}>Add photos or videos of your work. This helps customers choose you! <span style={{color:"#C4A882"}}>(optional — you can skip this)</span></p>
               <MediaUpload onUpload={setMedia} existing={media} />
-              {error && <p className="error">{error}</p>}
+              {error && (
+                <div>
+                  <p className="error">{error}</p>
+                  <p className="muted" style={{fontSize:"0.8rem", marginTop:"0.5rem"}}>You can skip photos and list your business now.</p>
+                </div>
+              )}
               <div style={{display:"flex", gap:"0.5rem", marginTop:"1rem"}}>
                 <button type="button" className="btn-secondary" onClick={() => setStep(3)}>Back</button>
-                <button type="submit" className="btn-primary" disabled={loading}>
+                <button type="submit" className="btn-primary" disabled={loading} onClick={() => setError("")}>
                   {loading ? "Creating listing..." : "List my business!"}
                 </button>
               </div>
