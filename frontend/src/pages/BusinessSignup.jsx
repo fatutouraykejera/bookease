@@ -116,7 +116,7 @@ export default function BusinessSignup({ navigate }) {
     }
   }
 
-  const currency = form.currency || CITY_CONFIG[form.city]?.currency || ""
+  const currency = form.currency || CITY_CONFIG[form.city]?.currency || "D"
 
   if (done) {
     return (
@@ -146,7 +146,7 @@ export default function BusinessSignup({ navigate }) {
         <h2>List your business</h2>
         <p className="muted" style={{marginBottom:"0.5rem"}}>Join BookEase and let customers book your services online.</p>
         <div className="pricing-note">
-          Setup fee: D1,000 (one-time) · Monthly: D500/month
+          Setup fee: {currency || "D"}1,000 (one-time) · Monthly: {currency || "D"}500/month
         </div>
 
         <div className="steps">
