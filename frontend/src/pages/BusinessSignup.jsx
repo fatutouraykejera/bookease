@@ -117,7 +117,8 @@ export default function BusinessSignup({ navigate }) {
       if (err.response?.status === 409) {
         setError("That email is already registered.")
       } else {
-        setError("Something went wrong. Please try again.")
+        const detail = err.response?.data?.detail || err.message || "Unknown error"
+        setError("Error: " + detail)
       }
     } finally {
       setLoading(false)
