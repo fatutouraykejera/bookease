@@ -117,8 +117,12 @@ export default function BusinessSignup({ navigate }) {
       if (err.response?.status === 409) {
         setError("That email is already registered.")
       } else {
-        const detail = err.response?.data?.detail || err.message || "Unknown error"
-        setError("Error: " + detail)
+        const detail = err.response?.data?.detail
+      if (Array.isArray(detail)) {
+        setError("Validation error: " + detail.map(d => d.msg + " (" + d.loc?.join(".") + ")").join(", "))
+      } else {
+        setError("Error: " + (typeof detail === "string" ? detail : JSON.stringify(detail) || err.message))
+      }
       }
     } finally {
       setLoading(false)
