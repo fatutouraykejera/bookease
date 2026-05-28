@@ -134,13 +134,13 @@ export default function BusinessSignup({ navigate }) {
   if (done) {
     return (
       <div className="card confirmation">
-        <div className="checkmark">+</div>
+        <div className="checkmark">✓</div>
         <h2>You're listed!</h2>
-        <p className="muted">Welcome to BookEase, {createdBusiness?.name}!</p>
+        <p className="muted">Welcome to BookEase, {createdBusiness?.name || form.name}!</p>
         <div className="booking-details">
-          <div className="detail-row"><span className="label">Business</span><span>{createdBusiness?.name}</span></div>
-          <div className="detail-row"><span className="label">Category</span><span>{createdBusiness?.category}</span></div>
-          <div className="detail-row"><span className="label">City</span><span>{createdBusiness?.city}</span></div>
+          <div className="detail-row"><span className="label">Business</span><span>{createdBusiness?.name || form.name}</span></div>
+          <div className="detail-row"><span className="label">Category</span><span>{createdBusiness?.category || form.category}</span></div>
+          <div className="detail-row"><span className="label">City</span><span>{createdBusiness?.city || form.city}</span></div>
         </div>
         <p className="muted" style={{marginTop:"1rem", fontSize:"0.85rem"}}>
           Customers can now find and book your services on BookEase!
