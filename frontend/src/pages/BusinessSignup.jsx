@@ -274,7 +274,7 @@ export default function BusinessSignup({ navigate }) {
               {error && <p className="error">{error}</p>}
               <div style={{display:"flex", gap:"0.5rem", marginTop:"0.5rem"}}>
                 <button type="button" className="btn-secondary" onClick={() => setStep(2)}>Back</button>
-                <button type="button" className="btn-primary" onClick={() => { setError(""); setStep(4) }}>Next</button>
+                <button type="button" className="btn-primary" onClick={() => { setError(""); setLoading(false); setStep(4) }}>Next</button>
               </div>
             </>
           )}
@@ -290,7 +290,7 @@ export default function BusinessSignup({ navigate }) {
                 </div>
               )}
               <div style={{display:"flex", gap:"0.5rem", marginTop:"1rem"}}>
-                <button type="button" className="btn-secondary" onClick={() => setStep(3)}>Back</button>
+                <button type="button" className="btn-secondary" onClick={() => { setError(""); setStep(3) }}>Back</button>
                 <button type="submit" className="btn-primary" disabled={loading} onClick={() => setError("")}>
                   {loading ? "Creating listing..." : "List my business!"}
                 </button>
