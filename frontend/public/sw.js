@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bookease-v3';
+const CACHE_NAME = 'bookease-v1780017896';
 const OFFLINE_URLS = [
   '/',
   '/index.html',
