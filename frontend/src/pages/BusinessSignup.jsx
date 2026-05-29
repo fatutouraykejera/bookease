@@ -56,6 +56,12 @@ export default function BusinessSignup({ navigate }) {
   const [done, setDone] = useState(false)
   const [createdBusiness, setCreatedBusiness] = useState(null)
 
+  // Clear error whenever step changes
+  useEffect(() => {
+    setError("")
+    setLoading(false)
+  }, [step])
+
   const handleChange = e => {
     const { name, value } = e.target
     if (name === "city") {
